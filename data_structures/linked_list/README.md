@@ -1,3 +1,10 @@
+This program demonstrates the following;
+
+* Implementation of linked lists in C.
+* Use of `malloc` and `free` in C.
+* Use of `sprintf` in C.
+* Use of `void*` in C.
+
 This directory shows an example of an idiomatic doubly linked list in C using
 structs. The linked list which is implemented is capable of storing arbitrary
 types of data, but integers are used for demonstration purposes.
