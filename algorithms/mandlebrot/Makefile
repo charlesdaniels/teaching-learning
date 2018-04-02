@@ -1,0 +1,2 @@
+demo:
+	./mandelbrot.py --display

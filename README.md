@@ -30,6 +30,8 @@ interesting output.
 
 ### Algorithms
 
+* [Mandlebrot Set Visualizer in Python](./algorithms/mandlebrot)
+
 ### Data Structures
 
 * [Linked List in C](./data_structures/linked_list)
