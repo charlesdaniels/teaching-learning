@@ -4,14 +4,14 @@
 * [Introduction](#introduction)
 * [Usage](#usage)
 * [Performance](#performance)
-    * [Test Machines](#test-machines)
-    * [Test Results](#test-results)
+	* [Test Machines](#test-machines)
+	* [Test Results](#test-results)
 
 <!-- vim-markdown-toc -->
 
 # Introduction
 
-[](./assets/demo.png)
+![](./assets/demo.png)
 
 This directory contains a parallel (non-naive) implementation of a Mandelbrot
 set generator in Python 3. This implementation demonstrates both a non-trivial
