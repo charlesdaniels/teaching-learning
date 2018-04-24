@@ -35,6 +35,7 @@ interesting output.
 ### Data Structures
 
 * [Linked List in C](./data_structures/linked_list)
+* [Finite Automata in Python](./data_structures/simple_fa)
 
 ### Languages
 
