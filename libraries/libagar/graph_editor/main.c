@@ -42,6 +42,10 @@
 #define state_v1 1     /* selecting the first vertex */
 #define state_v2 2     /* selecting the second vertex */
 
+/* handy macro to check if a string ends with a certain 4 letter character
+ * sequence. This is used for checking file extensions. */
+#define check_ext(str, ext) (strlen(str) > 4 && !strcmp(str + strlen(str) - 4, ext))
+
 /* Helper macro for use within event handlers, traverses up the VFS tree to
  * grab the top-level driver object. This is needed since AG_ObjectRoot()
  * dosen't always traverse all the way up the tree in one go */
@@ -61,7 +65,7 @@ void LaunchDebugger(AG_Event *event) {
 
 	/* Fetch the top-level driver object, which is also the parent of the
 	 * main window. We will attach the debugger window to this object. */
-	dri = (AG_Driver*) AG_ObjectRoot(AG_SELF());
+	dri = (AG_Driver*) get_dri();
 
 	db_window = AG_GuiDebugger(dri);
 	AG_WindowShow(db_window);
@@ -104,7 +108,7 @@ void AutoLayout(AG_Event* event) {
 }
 
 
-/* Create a new edge. This is done by putting us in state_v1, which 
+/* Create a new edge. This is done by putting us in state_v1, which
  * HandleVertexSelection will use when we click on a vertex to know that it
  * should populate the relevant variable */
 void AddEdge(AG_Event* event) {
@@ -137,7 +141,7 @@ void HandleVertexSelection(AG_Event* event) {
 
 	/* we are currently selecting the first vertex */
 	if (AG_GetUint(dri, "state") == state_v1) {
-		
+
 		/* set the variable for the selected vertex */
 		AG_SetPointer(dri, "selected_vertex", vtx);
 
@@ -165,6 +169,95 @@ void HandleVertexSelection(AG_Event* event) {
 			AG_LabelText(statuslabel, "edge created... ready.");
 		}
 	}
+
+}
+
+/* handler for the OK button in the file dialog */
+void ExportGraph(AG_Event* event) {
+
+	char* path = AG_STRING(1);
+
+	AG_Driver* dri = get_dri();
+	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
+	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
+
+	/* this is not safe, as it does not do bounds checking */
+	char* path_with_ext = malloc(sizeof(char) * (strlen(path) + 4));
+	strcpy(path_with_ext, path);
+
+	/* workaround for the fact that in LibAgar 1.5.0 the callbacks for
+	 * AG_FileDlgAddType() is broken (never called), and also that
+	 * FileDlgOkAction() never passes the selected FileType. This works by
+	 * directly overriding the event handler for the ComboBox that is used
+	 * to select file types. This might break since it does not handle the
+	 * cases where the user manually types something. Note the AG_SELF is
+	 * the file dialog. This is a kludgy mess, and is horribly unsafe. It
+	 * will definitely break if the internal structure of any of the
+	 * relevant widgets changes, or in non-default locales (due to the
+	 * ent[0]). Probably also in other cases. */
+	char* selected_type =
+		((AG_FileDlg*) AG_SELF())->comTypes->tbox->text->ent[0].buf;
+
+	/* force the widget to redraw, to make sure that the state we pull
+	 * out of the surface is current */
+	AG_WidgetDraw(g);
+
+	/* copy the current state of the g surface to a new surface object */
+	AG_Surface* surf = AG_WidgetSurface(g);
+
+	/* this is an awful way to do this... don't do this */
+	if (strcmp(selected_type, "PNG image (.png)") == 0) {
+		if (!check_ext(path, ".png")) {
+			/* unsafe, does not bounds check */
+			strcat(path_with_ext, ".png");
+		}
+		AG_SurfaceExportPNG(surf, path_with_ext, 0);
+
+	} else if (strcmp(selected_type, "JPEG image (.jpg)") == 0) {
+		if (!check_ext(path, ".jpg")) {
+			/* unsafe, does not bounds check */
+			strcat(path_with_ext, ".jpg");
+		}
+		AG_SurfaceExportJPEG(surf, path_with_ext, 80, 0);
+
+	} else {
+		if (!check_ext(path, ".bmp")) {
+			/* unsafe, does not bounds check */
+			strcat(path_with_ext, ".bmp");
+		}
+		AG_SurfaceExportBMP(surf, path);
+	}
+
+	/* destroy the file dialog */
+	AG_ObjectDetach(AG_ObjectParent(AG_SELF()));
+
+	/* clean up the surface object */
+	AG_SurfaceFree(surf);
+
+}
+
+/* Export the graph view to a file */
+void ExportGraphDialog(AG_Event* event) {
+
+	/* create a new window in which to display the file dialog */
+	AG_Window* fdwin = AG_WindowNew(0);
+
+	AG_FileDlg* f = AG_FileDlgNew(fdwin,
+			AG_FILEDLG_SAVE |  /* make sure the file is writable */
+			AG_FILEDLG_EXPAND |
+			AG_FILEDLG_CLOSEWIN /* close window when done */
+		);
+
+	/* set up valid output types */
+	AG_FileDlgAddType(f, "PNG image", ".png", NULL, NULL);
+	AG_FileDlgAddType(f, "JPEG image", ".jpg", NULL, NULL);
+	AG_FileDlgAddType(f, "BPM image", ".bmp", NULL, NULL);
+
+	/* handler to run when the ok button is pressed */
+	AG_FileDlgOkAction(f, ExportGraph, NULL);
+
+	/* display the file dialog window */
+	AG_WindowShow(fdwin);
 
 }
 
@@ -257,14 +350,8 @@ int main(int argc, char *argv[]) {
 	/* instantiate the contents of the File menu */
 	{
 
-		AG_MenuAction(menu_file, "Add Vertex", NULL, AddVertex, NULL);
-		AG_MenuAction(menu_file, "Auto Layout", NULL, AutoLayout, NULL);
 		AG_MenuAction(menu_file, "Demo", NULL, CreateSomeNodes, NULL);
-		AG_MenuAction(menu_file, "Add Edge", NULL, AddEdge, NULL);
-
-
-		/* AG_Button * AG_ToolbarButton (AG_Toolbar *toolbar, const char *text, int enable_default, void (*fn)(AG_Event *), const char *fnArgs, ...) */
-		AG_ToolbarButton(tb, "MUH BUTTON", 1, AddVertex, NULL);
+		AG_MenuAction(menu_file, "Export", NULL, ExportGraphDialog, NULL);
 
 		AG_MenuSeparator(menu_file);
 
@@ -274,6 +361,15 @@ int main(int argc, char *argv[]) {
 		AG_MenuSeparator(menu_file);
 		AG_MenuAction(menu_file, "Launch Debugger", NULL, LaunchDebugger, NULL);
 #endif
+	}
+
+
+	/* instantiates the contents of the toolbar */
+	{
+		AG_ToolbarButton(tb, "Add Vertex", 1, AddVertex, NULL);
+		AG_ToolbarButton(tb, "Add Edge", 1, AddEdge, NULL);
+		AG_ToolbarSeparator(tb);
+		AG_ToolbarButton(tb, "Auto Layout", 1, AutoLayout, NULL);
 	}
 
 
