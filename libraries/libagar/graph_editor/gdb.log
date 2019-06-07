@@ -1,0 +1,392 @@
+GNU gdb (Ubuntu 8.1-0ubuntu3) 8.1.0.20180409-git
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+<http://www.gnu.org/software/gdb/documentation/>.
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from ./graph_editor...(no debugging symbols found)...done.
+(gdb) r
+Starting program: /home/cad/src/teaching-learning/libraries/libagar/graph_editor/graph_editor 
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffece24700 (LWP 22622)]
+Registered class: AG_Config: AG_Config ()
+Registered class: AG_Db: AG_Db ()
+Registered class: AG_Driver: AG_Driver ()
+Registered class: AG_DriverSw: AG_Driver:AG_DriverSw ()
+Registered class: AG_DriverMw: AG_Driver:AG_DriverMw ()
+Registered class: AG_InputDevice: AG_InputDevice ()
+Registered class: AG_Mouse: AG_InputDevice:AG_Mouse ()
+Registered class: AG_Keyboard: AG_InputDevice:AG_Keyboard ()
+Registered class: AG_DriverGLX: AG_Driver:AG_DriverMw:AG_DriverGLX ()
+Registered class: AG_DriverSDLGL: AG_Driver:AG_DriverSw:AG_DriverSDLGL ()
+Registered class: AG_DriverSDLFB: AG_Driver:AG_DriverSw:AG_DriverSDLFB ()
+agInputDevices: Attached child: AG_Mouse #0
+AG_Mouse #0: New parent: agInputDevices
+agInputDevices: Attached child: AG_Keyboard #0
+AG_Keyboard #0: New parent: agInputDevices
+agDrivers: Attached child: glx1
+glx1: New parent: agDrivers
+Registered class: AG_Widget: AG_Widget ()
+Registered class: AG_Window: AG_Widget:AG_Window ()
+Registered class: AG_Font: AG_Font ()
+Registered class: AG_Box: AG_Widget:AG_Box ()
+Registered class: AG_Button: AG_Widget:AG_Button ()
+Registered class: AG_Checkbox: AG_Widget:AG_Checkbox ()
+Registered class: AG_Combo: AG_Widget:AG_Combo ()
+Registered class: AG_Console: AG_Widget:AG_Console ()
+Registered class: AG_DirDlg: AG_Widget:AG_DirDlg ()
+Registered class: AG_Editable: AG_Widget:AG_Editable ()
+Registered class: AG_FontSelector: AG_Widget:AG_FontSelector ()
+Registered class: AG_FileDlg: AG_Widget:AG_FileDlg ()
+Registered class: AG_FileSelector: AG_Widget:AG_FileSelector ()
+Registered class: AG_Fixed: AG_Widget:AG_Fixed ()
+Registered class: AG_FSpinbutton: AG_Widget:AG_FSpinbutton ()
+Registered class: AG_FixedPlotter: AG_Widget:AG_FixedPlotter ()
+Registered class: AG_Graph: AG_Widget:AG_Graph ()
+Registered class: AG_GLView: AG_Widget:AG_GLView ()
+Registered class: AG_HSVPal: AG_Widget:AG_HSVPal ()
+Registered class: AG_Icon: AG_Widget:AG_Icon ()
+Registered class: AG_Label: AG_Widget:AG_Label ()
+Registered class: AG_Menu: AG_Widget:AG_Menu ()
+Registered class: AG_MenuView: AG_Widget:AG_MenuView ()
+Registered class: AG_MFSpinbutton: AG_Widget:AG_MFSpinbutton ()
+Registered class: AG_MPane: AG_Widget:AG_Box:AG_MPane ()
+Registered class: AG_MSpinbutton: AG_Widget:AG_MSpinbutton ()
+Registered class: AG_Notebook: AG_Widget:AG_Notebook ()
+Registered class: AG_NotebookTab: AG_Widget:AG_Box:AG_NotebookTab ()
+Registered class: AG_Numerical: AG_Widget:AG_Numerical ()
+Registered class: AG_ObjectSelector: AG_Widget:AG_Combo:AG_ObjectSelector ()
+Registered class: AG_Pane: AG_Widget:AG_Pane ()
+Registered class: AG_Pixmap: AG_Widget:AG_Pixmap ()
+Registered class: AG_ProgressBar: AG_Widget:AG_ProgressBar ()
+Registered class: AG_Radio: AG_Widget:AG_Radio ()
+Registered class: AG_Scrollbar: AG_Widget:AG_Scrollbar ()
+Registered class: AG_Scrollview: AG_Widget:AG_Scrollview ()
+Registered class: AG_Separator: AG_Widget:AG_Separator ()
+Registered class: AG_Slider: AG_Widget:AG_Slider ()
+Registered class: AG_Socket: AG_Widget:AG_Socket ()
+Registered class: AG_Spinbutton: AG_Widget:AG_Spinbutton ()
+Registered class: AG_Statusbar: AG_Widget:AG_Box:AG_Statusbar ()
+Registered class: AG_Titlebar: AG_Widget:AG_Box:AG_Titlebar ()
+Registered class: AG_Table: AG_Widget:AG_Table ()
+Registered class: AG_Treetbl: AG_Widget:AG_Treetbl ()
+Registered class: AG_Textbox: AG_Widget:AG_Textbox ()
+Registered class: AG_Tlist: AG_Widget:AG_Tlist ()
+Registered class: AG_Toolbar: AG_Widget:AG_Box:AG_Toolbar ()
+Registered class: AG_UCombo: AG_Widget:AG_UCombo ()
+agInputDevices: Attached child: AG_Mouse #1
+AG_Mouse #1: New parent: agInputDevices
+agInputDevices: Attached child: AG_Keyboard #1
+AG_Keyboard #1: New parent: agInputDevices
+agDrivers: Attached child: glx2
+glx2: New parent: agDrivers
+generic: Attach to driver (glx2)
+AG_Menu #0: Attach to window (generic)
+generic: Attached child: AG_Menu #0
+AG_Menu #0: New parent: generic
+agInputDevices: Attached child: AG_Mouse #2
+AG_Mouse #2: New parent: agInputDevices
+agInputDevices: Attached child: AG_Keyboard #2
+AG_Keyboard #2: New parent: agInputDevices
+agDrivers: Attached child: glx3
+glx3: New parent: agDrivers
+generic: Attach to driver (glx3)
+AG_MenuView #0: Attach to window (_Popup-AG_Menu #0)
+_Popup-AG_Menu #0: Attached child: AG_MenuView #0
+AG_MenuView #0: New parent: _Popup-AG_Menu #0
+agInputDevices: Attached child: AG_Mouse #3
+AG_Mouse #3: New parent: agInputDevices
+agInputDevices: Attached child: AG_Keyboard #3
+AG_Keyboard #3: New parent: agInputDevices
+agDrivers: Attached child: glx4
+glx4: New parent: agDrivers
+generic: Attach to driver (glx4)
+AG_Box #0: Attach to widget ( in NULL)
+<0x55555578ac00>: Attached child: AG_Box #0
+AG_Box #0: New parent: <0x55555578ac00>
+AG_Box #1: Attach to widget ( in NULL)
+<0x55555578ac00>: Attached child: AG_Box #1
+AG_Box #1: New parent: <0x55555578ac00>
+AG_Pane #0: Attach to window (AG_GuiDebugger)
+AG_GuiDebugger: Attached child: AG_Pane #0
+AG_Pane #0: New parent: AG_GuiDebugger
+AG_Scrollbar #0: Attach to widget ( in NULL)
+<0x555555df3f90>: Attached child: AG_Scrollbar #0
+AG_Scrollbar #0: New parent: <0x555555df3f90>
+AG_Tlist #0: Attach to widget (AG_Box #0 in AG_GuiDebugger)
+AG_Box #0: Attached child: AG_Tlist #0
+AG_Tlist #0: New parent: AG_Box #0
+AG_Notebook #0: Attach to widget (AG_Box #1 in AG_GuiDebugger)
+AG_Box #1: Attached child: AG_Notebook #0
+AG_Notebook #0: New parent: AG_Box #1
+AG_Label #0: Attach to widget (AG_Notebook #0 in AG_GuiDebugger)
+AG_Notebook #0: Attached child: AG_Label #0
+AG_Label #0: New parent: AG_Notebook #0
+AG_NotebookTab #0: Attach to widget (AG_Notebook #0 in AG_GuiDebugger)
+AG_Notebook #0: Attached child: AG_NotebookTab #0
+AG_NotebookTab #0: New parent: AG_Notebook #0
+AG_Editable #0: Attach to widget ( in NULL)
+<0x555556044620>: Attached child: AG_Editable #0
+AG_Editable #0: New parent: <0x555556044620>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556044620>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556044620>
+AG_Textbox #0: Attach to widget (AG_NotebookTab #0 in AG_GuiDebugger)
+AG_NotebookTab #0: Attached child: AG_Textbox #0
+AG_Textbox #0: New parent: AG_NotebookTab #0
+AG_Label #0: Attach to widget (AG_NotebookTab #0 in AG_GuiDebugger)
+AG_NotebookTab #0: Attached child: AG_Label #0
+AG_Label #0: New parent: AG_NotebookTab #0
+AG_Label #1: Attach to widget (AG_NotebookTab #0 in AG_GuiDebugger)
+AG_NotebookTab #0: Attached child: AG_Label #1
+AG_Label #1: New parent: AG_NotebookTab #0
+AG_Label #2: Attach to widget (AG_NotebookTab #0 in AG_GuiDebugger)
+AG_NotebookTab #0: Attached child: AG_Label #2
+AG_Label #2: New parent: AG_NotebookTab #0
+AG_Label #3: Attach to widget (AG_NotebookTab #0 in AG_GuiDebugger)
+AG_NotebookTab #0: Attached child: AG_Label #3
+AG_Label #3: New parent: AG_NotebookTab #0
+AG_Separator #0: Attach to widget (AG_NotebookTab #0 in AG_GuiDebugger)
+AG_NotebookTab #0: Attached child: AG_Separator #0
+AG_Separator #0: New parent: AG_NotebookTab #0
+AG_Scrollbar #0: Attach to widget ( in NULL)
+<0x55555606fb10>: Attached child: AG_Scrollbar #0
+AG_Scrollbar #0: New parent: <0x55555606fb10>
+AG_Scrollbar #1: Attach to widget ( in NULL)
+<0x55555606fb10>: Attached child: AG_Scrollbar #1
+AG_Scrollbar #1: New parent: <0x55555606fb10>
+AG_Scrollview #0: Attach to widget (AG_NotebookTab #0 in AG_GuiDebugger)
+AG_NotebookTab #0: Attached child: AG_Scrollview #0
+AG_Scrollview #0: New parent: AG_NotebookTab #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556081a40>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556081a40>
+AG_Checkbox #0: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #0
+AG_Checkbox #0: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556088130>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556088130>
+AG_Checkbox #1: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #1
+AG_Checkbox #1: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x55555608e820>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x55555608e820>
+AG_Checkbox #2: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #2
+AG_Checkbox #2: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556094f10>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556094f10>
+AG_Checkbox #3: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #3
+AG_Checkbox #3: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x55555609b600>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x55555609b600>
+AG_Checkbox #4: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #4
+AG_Checkbox #4: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x5555560a1cf0>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x5555560a1cf0>
+AG_Checkbox #5: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #5
+AG_Checkbox #5: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x5555560a83e0>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x5555560a83e0>
+AG_Checkbox #6: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #6
+AG_Checkbox #6: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x5555560aead0>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x5555560aead0>
+AG_Checkbox #7: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #7
+AG_Checkbox #7: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x5555560b51c0>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x5555560b51c0>
+AG_Checkbox #8: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #8
+AG_Checkbox #8: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x5555560bb8b0>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x5555560bb8b0>
+AG_Checkbox #9: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #9
+AG_Checkbox #9: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x5555560c1fa0>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x5555560c1fa0>
+AG_Checkbox #10: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #10
+AG_Checkbox #10: New parent: AG_Scrollview #0
+AG_Label #0: Attach to widget ( in NULL)
+<0x5555560c8690>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x5555560c8690>
+AG_Checkbox #11: Attach to widget (AG_Scrollview #0 in AG_GuiDebugger)
+AG_Scrollview #0: Attached child: AG_Checkbox #11
+AG_Checkbox #11: New parent: AG_Scrollview #0
+AG_Label #1: Attach to widget (AG_Notebook #0 in AG_GuiDebugger)
+AG_Notebook #0: Attached child: AG_Label #1
+AG_Label #1: New parent: AG_Notebook #0
+AG_NotebookTab #1: Attach to widget (AG_Notebook #0 in AG_GuiDebugger)
+AG_Notebook #0: Attached child: AG_NotebookTab #1
+AG_NotebookTab #1: New parent: AG_Notebook #0
+AG_Scrollbar #0: Attach to widget ( in NULL)
+<0x5555560d3d40>: Attached child: AG_Scrollbar #0
+AG_Scrollbar #0: New parent: <0x5555560d3d40>
+AG_Tlist #0: Attach to widget (AG_NotebookTab #1 in AG_GuiDebugger)
+AG_NotebookTab #1: Attached child: AG_Tlist #0
+AG_Tlist #0: New parent: AG_NotebookTab #1
+AG_Label #2: Attach to widget (AG_Notebook #0 in AG_GuiDebugger)
+AG_Notebook #0: Attached child: AG_Label #2
+AG_Label #2: New parent: AG_Notebook #0
+AG_NotebookTab #2: Attach to widget (AG_Notebook #0 in AG_GuiDebugger)
+AG_Notebook #0: Attached child: AG_NotebookTab #2
+AG_NotebookTab #2: New parent: AG_Notebook #0
+AG_Editable #0: Attach to widget ( in NULL)
+<0x5555560ea710>: Attached child: AG_Editable #0
+AG_Editable #0: New parent: <0x5555560ea710>
+AG_Textbox #0: Attach to widget ( in NULL)
+<0x5555560e82b0>: Attached child: AG_Textbox #0
+AG_Textbox #0: New parent: <0x5555560e82b0>
+AG_Label #0: Attach to widget ( in NULL)
+<0x5555560fb330>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x5555560fb330>
+AG_Button #0: Attach to widget ( in NULL)
+<0x5555560e82b0>: Attached child: AG_Button #0
+AG_Button #0: New parent: <0x5555560e82b0>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556103ea0>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556103ea0>
+AG_Button #1: Attach to widget ( in NULL)
+<0x5555560e82b0>: Attached child: AG_Button #1
+AG_Button #1: New parent: <0x5555560e82b0>
+AG_Label #0: Attach to widget ( in NULL)
+<0x55555610ca10>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x55555610ca10>
+AG_Button #2: Attach to widget ( in NULL)
+<0x5555560e82b0>: Attached child: AG_Button #2
+AG_Button #2: New parent: <0x5555560e82b0>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556115600>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556115600>
+AG_Button #3: Attach to widget ( in NULL)
+<0x5555560e82b0>: Attached child: AG_Button #3
+AG_Button #3: New parent: <0x5555560e82b0>
+AG_Label #0: Attach to widget (AG_Textbox #0 in NULL)
+AG_Textbox #0: Attached child: AG_Label #0
+AG_Label #0: New parent: AG_Textbox #0
+AG_MSpinbutton #0: Attach to widget (AG_NotebookTab #2 in AG_GuiDebugger)
+AG_NotebookTab #2: Attached child: AG_MSpinbutton #0
+AG_MSpinbutton #0: New parent: AG_NotebookTab #2
+AG_Editable #0: Attach to widget ( in NULL)
+<0x5555561282b0>: Attached child: AG_Editable #0
+AG_Editable #0: New parent: <0x5555561282b0>
+AG_Textbox #0: Attach to widget ( in NULL)
+<0x555556125c50>: Attached child: AG_Textbox #0
+AG_Textbox #0: New parent: <0x555556125c50>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556139450>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556139450>
+AG_Button #0: Attach to widget ( in NULL)
+<0x555556125c50>: Attached child: AG_Button #0
+AG_Button #0: New parent: <0x555556125c50>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556142040>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556142040>
+AG_Button #1: Attach to widget ( in NULL)
+<0x555556125c50>: Attached child: AG_Button #1
+AG_Button #1: New parent: <0x555556125c50>
+AG_Label #0: Attach to widget ( in NULL)
+<0x55555614ac30>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x55555614ac30>
+AG_Button #2: Attach to widget ( in NULL)
+<0x555556125c50>: Attached child: AG_Button #2
+AG_Button #2: New parent: <0x555556125c50>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556153820>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556153820>
+AG_Button #3: Attach to widget ( in NULL)
+<0x555556125c50>: Attached child: AG_Button #3
+AG_Button #3: New parent: <0x555556125c50>
+AG_Label #0: Attach to widget (AG_Textbox #0 in NULL)
+AG_Textbox #0: Attached child: AG_Label #0
+AG_Label #0: New parent: AG_Textbox #0
+AG_MSpinbutton #1: Attach to widget (AG_NotebookTab #2 in AG_GuiDebugger)
+AG_NotebookTab #2: Attached child: AG_MSpinbutton #1
+AG_MSpinbutton #1: New parent: AG_NotebookTab #2
+AG_Editable #0: Attach to widget ( in NULL)
+<0x5555561664d0>: Attached child: AG_Editable #0
+AG_Editable #0: New parent: <0x5555561664d0>
+AG_Textbox #0: Attach to widget ( in NULL)
+<0x555556163e70>: Attached child: AG_Textbox #0
+AG_Textbox #0: New parent: <0x555556163e70>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556177670>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556177670>
+AG_Button #0: Attach to widget ( in NULL)
+<0x555556163e70>: Attached child: AG_Button #0
+AG_Button #0: New parent: <0x555556163e70>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556180260>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556180260>
+AG_Button #1: Attach to widget ( in NULL)
+<0x555556163e70>: Attached child: AG_Button #1
+AG_Button #1: New parent: <0x555556163e70>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556188e50>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556188e50>
+AG_Button #2: Attach to widget ( in NULL)
+<0x555556163e70>: Attached child: AG_Button #2
+AG_Button #2: New parent: <0x555556163e70>
+AG_Label #0: Attach to widget ( in NULL)
+<0x555556191a40>: Attached child: AG_Label #0
+AG_Label #0: New parent: <0x555556191a40>
+AG_Button #3: Attach to widget ( in NULL)
+<0x555556163e70>: Attached child: AG_Button #3
+AG_Button #3: New parent: <0x555556163e7
+Thread 1 "graph_editor" received signal SIGSEGV, Segmentation fault.
+0x00007ffff7b5ee8b in PollSurfaces (event=0x7fffffffd7e0) at debugger.c:163
+163			    i, su->w, su->h, su->format->BitsPerPixel);
+(gdb) bt
+#0  0x00007ffff7b5ee8b in PollSurfaces (event=0x7fffffffd7e0) at debugger.c:163
+#1  0x00007ffff7847b3f in AG_PostEvent (sp=0x0, rp=0x5555561e5270, evname=0x7ffff7b9dafb "tlist-poll", fmt=0x0) at event.c:465
+#2  0x00007ffff7ae9f82 in UpdatePolled (tl=0x5555561e5270) at tlist.c:84
+#3  0x00007ffff7aeb0ef in Draw (obj=0x5555561e5270) at tlist.c:449
+#4  0x00007ffff7ac212c in AG_WidgetDraw (p=0x5555561e5270) at widget.c:1230
+#5  0x00007ffff7ad9932 in Draw (obj=0x5555561e02b0) at box.c:123
+#6  0x00007ffff7ac3240 in AG_WidgetInheritDraw (obj=0x5555561e02b0) at widget.c:1621
+#7  0x00007ffff7ac212c in AG_WidgetDraw (p=0x5555561e02b0) at widget.c:1230
+#8  0x00007ffff7b1fadb in Draw (obj=0x555556045570) at notebook.c:130
+#9  0x00007ffff7ac212c in AG_WidgetDraw (p=0x555556045570) at widget.c:1230
+#10 0x00007ffff7ad9932 in Draw (obj=0x555555df0570) at box.c:123
+#11 0x00007ffff7ac212c in AG_WidgetDraw (p=0x555555df0570) at widget.c:1230
+#12 0x00007ffff7b46fc4 in Draw (obj=0x55555578ac00) at pane.c:322
+#13 0x00007ffff7ac212c in AG_WidgetDraw (p=0x55555578ac00) at widget.c:1230
+#14 0x00007ffff7ac77a0 in Draw (obj=0x555555de15c0) at window.c:696
+#15 0x00007ffff7ac212c in AG_WidgetDraw (p=0x555555de15c0) at widget.c:1230
+#16 0x00007ffff7ab697f in GLX_RenderWindow (win=0x555555de15c0) at drv_glx.c:873
+#17 0x00007ffff7ac87f4 in AG_WindowDrawQueued () at window.c:1013
+#18 0x00007ffff7ab9ac0 in GLX_EventEpilogue (es=0x55555576ebe0, event=0x55555576ec00) at drv_glx.c:2032
+#19 0x00007ffff784eb06 in AG_EventLoop () at event.c:1596
+#20 0x0000555555554c19 in main ()
+(gdb) quit
+A debugging session is active.
+
+	Inferior 1 [process 22618] will be killed.
+
+Quit anyway? (y or n) y

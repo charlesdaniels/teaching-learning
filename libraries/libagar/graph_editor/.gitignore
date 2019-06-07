@@ -1,0 +1,6 @@
+config/*
+config.log
+config.status
+configure.lua
+*.o
+.depend
