@@ -42,6 +42,11 @@
 #define state_v1 1     /* selecting the first vertex */
 #define state_v2 2     /* selecting the second vertex */
 
+/* Helper macro for use within event handlers, traverses up the VFS tree to
+ * grab the top-level driver object. This is needed since AG_ObjectRoot()
+ * dosen't always traverse all the way up the tree in one go */
+#define get_dri() (AG_Driver*) AG_ObjectFindParent(AG_SELF(), "agDrivers", NULL)
+
 /* handler for "quit" menu item */
 void QuitApplication(AG_Event *event) {
 	AG_Quit();
@@ -69,7 +74,7 @@ void AddVertex(AG_Event *event) {
 	/* AG uses an object tree, rooted at the driver object. We can call
 	 * AG_Object_Root to traverse all the way up the tree to the driver, so
 	 * we can safely use that as a convenient place to stick variables */
-	AG_Driver* dri = (AG_Driver*) AG_ObjectRoot(AG_SELF());
+	AG_Driver* dri = get_dri();
 
 	/* We have a raw pointer to the graph widget stored by main() during
 	 * initialization */
@@ -87,7 +92,7 @@ void AddVertex(AG_Event *event) {
 /* Automatically layout all of the nodes we have already placed to try and
  * ensure no overlapping edges */
 void AutoLayout(AG_Event* event) {
-	AG_Driver* dri = (AG_Driver*) AG_ObjectRoot(AG_SELF());
+	AG_Driver* dri = get_dri();
 	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
 	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
 
@@ -103,7 +108,7 @@ void AutoLayout(AG_Event* event) {
  * HandleVertexSelection will use when we click on a vertex to know that it
  * should populate the relevant variable */
 void AddEdge(AG_Event* event) {
-	AG_Driver* dri = (AG_Driver*) AG_ObjectRoot(AG_SELF());
+	AG_Driver* dri = get_dri();
 
 	/* This is much like the grap_p object -- status_label_p is set
 	 * during initialization to be the pointer to the status label. */
@@ -126,7 +131,7 @@ void HandleVertexSelection(AG_Event* event) {
 	 * a variable for use when creating an edge later */
 	AG_GraphVertex* vtx = (AG_GraphVertex*) AG_PTR(1);
 
-	AG_Driver* dri = (AG_Driver*) AG_ObjectRoot(AG_SELF());
+	AG_Driver* dri = get_dri();
 	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
 	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
 
@@ -167,7 +172,7 @@ void CreateSomeNodes(AG_Event* event) {
 	/* Create some nodes and then lay them out using the auto-layout. This
 	 * is just to get some vertices and edges out for demo purposes. */
 
-	AG_Driver* dri = (AG_Driver*) AG_ObjectRoot(AG_SELF());
+	AG_Driver* dri = get_dri();
 	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
 	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
 
@@ -206,6 +211,7 @@ int main(int argc, char *argv[]) {
 	AG_Driver* dri;
 	AG_MenuItem* temp;
 	AG_Menu* menu;
+	AG_Toolbar* tb;
 
 	/* Initialize LibAgar */
 	if (AG_InitCore(NULL, 0) == -1 ||
@@ -222,6 +228,8 @@ int main(int argc, char *argv[]) {
 	AG_SetPointer(dri, "selected_vertex", NULL);
 
 	menu = AG_MenuNew(win, 0);
+	tb = AG_ToolbarNew(win, AG_TOOLBAR_HORIZ, 1, AG_TOOLBAR_VFILL);
+
 
 	/* instantiate the graph */
 	g = AG_GraphNew(win, AG_GRAPH_EXPAND);
@@ -236,6 +244,13 @@ int main(int argc, char *argv[]) {
 	 * type system */
 	AG_SetPointer(dri, "graph_p", g);
 
+	/* Setup the status bar at the bottom of the window */
+	AG_SeparatorNew(win, AG_SEPARATOR_HORIZ);
+	statusbar = AG_StatusbarNew(win, AG_STATUSBAR_HFILL);
+	statuslabel = AG_StatusbarAddLabel(statusbar, "");
+	AG_SetPointer(dri, "status_label_p", statuslabel);
+	AG_LabelText(statuslabel, "ready");
+
 	/* instantiate the "File" menu dropdown */
 	AG_MenuItem* menu_file = AG_MenuNode(menu->root, "File", NULL);
 
@@ -247,6 +262,10 @@ int main(int argc, char *argv[]) {
 		AG_MenuAction(menu_file, "Demo", NULL, CreateSomeNodes, NULL);
 		AG_MenuAction(menu_file, "Add Edge", NULL, AddEdge, NULL);
 
+
+		/* AG_Button * AG_ToolbarButton (AG_Toolbar *toolbar, const char *text, int enable_default, void (*fn)(AG_Event *), const char *fnArgs, ...) */
+		AG_ToolbarButton(tb, "MUH BUTTON", 1, AddVertex, NULL);
+
 		AG_MenuSeparator(menu_file);
 
 		AG_MenuAction(menu_file, "Quit", NULL, QuitApplication, NULL);
@@ -257,12 +276,6 @@ int main(int argc, char *argv[]) {
 #endif
 	}
 
-	/* Setup the status bar at the bottom of the window */
-	AG_SeparatorNew(win, AG_SEPARATOR_HORIZ);
-	statusbar = AG_StatusbarNew(win, AG_STATUSBAR_HFILL);
-	statuslabel = AG_StatusbarAddLabel(statusbar, "");
-	AG_SetPointer(dri, "status_label_p", statuslabel);
-	AG_LabelText(statuslabel, "ready");
 
 	AG_WindowShow(win);
 

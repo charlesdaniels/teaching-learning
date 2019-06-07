@@ -4,3 +4,4 @@ config.status
 configure.lua
 *.o
 .depend
+graph_editor
