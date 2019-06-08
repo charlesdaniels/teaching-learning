@@ -1202,7 +1202,7 @@ if [ $? != 0 ]; then
 	echo "-> failed ($?)" >> config.log
 	MK_COMPILE_STATUS="FAIL($?)"
 fi
-if [ "${MK_COMPILE_STATUS}" = "OK" ]; then
+# if [ "${MK_COMPILE_STATUS}" = "OK" ]; then
 echo "yes"
 echo "yes" >> config.log
 HAVE_AGAR="yes"
@@ -1210,13 +1210,13 @@ echo "#ifndef HAVE_AGAR" > config/have_agar.h
 echo "#define HAVE_AGAR \"$HAVE_AGAR\"" >> config/have_agar.h
 echo "#endif" >> config/have_agar.h
 echo "hdefs[\"HAVE_AGAR\"] = \"$HAVE_AGAR\"" >>configure.lua
-else
-echo "no"
-echo "no" >> config.log
-HAVE_AGAR="no"
-echo "#undef HAVE_AGAR" >config/have_agar.h
-echo "hdefs[\"HAVE_AGAR\"] = nil" >>configure.lua
-fi;
+# else
+# echo "no"
+# echo "no" >> config.log
+# HAVE_AGAR="no"
+# echo "#undef HAVE_AGAR" >config/have_agar.h
+# echo "hdefs[\"HAVE_AGAR\"] = nil" >>configure.lua
+# fi;
 rm -f conftest.c $testdir/conftest$EXECSUFFIX
 if [ "${HAVE_AGAR}" = "yes" ]; then
 echo "#ifndef AGAR_CFLAGS" > config/agar_cflags.h

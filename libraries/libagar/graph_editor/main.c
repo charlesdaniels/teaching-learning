@@ -34,6 +34,9 @@
 #include <agar/core.h>
 #include <agar/gui.h>
 
+#include <stdlib.h>
+#include <string.h>
+
 /* We use a global state variable to handle creating edges so we know weather
  * we are currently selecting the first edge, or the second edge. This
  * should probably be an enum. */
@@ -53,6 +56,8 @@
 
 /* handler for "quit" menu item */
 void QuitApplication(AG_Event *event) {
+	AG_DestroyGraphics();
+	AG_Destroy();
 	AG_Quit();
 }
 
@@ -75,15 +80,9 @@ void LaunchDebugger(AG_Event *event) {
 /* Add a new vertex */
 void AddVertex(AG_Event *event) {
 
-	/* AG uses an object tree, rooted at the driver object. We can call
-	 * AG_Object_Root to traverse all the way up the tree to the driver, so
-	 * we can safely use that as a convenient place to stick variables */
-	AG_Driver* dri = get_dri();
-
-	/* We have a raw pointer to the graph widget stored by main() during
-	 * initialization */
-	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
-	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
+	/* Get named arguments from AddEvent */
+	AG_Graph* g = (AG_Graph*) AG_PTR_NAMED("g");
+	AG_Label* statuslabel = (AG_Label*) AG_PTR_NAMED("statuslabel");
 
 	/* Create the new vertex. We assign it an empty label due to LibAgar
 	 * issue #13 (https://github.com/JulNadeauCA/libagar/issues/13) */
@@ -96,9 +95,8 @@ void AddVertex(AG_Event *event) {
 /* Automatically layout all of the nodes we have already placed to try and
  * ensure no overlapping edges */
 void AutoLayout(AG_Event* event) {
-	AG_Driver* dri = get_dri();
-	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
-	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
+	AG_Graph* g = (AG_Graph*) AG_PTR_NAMED("g");
+	AG_Label* statuslabel = (AG_Label*) AG_PTR_NAMED("statuslabel");
 
 	/* Somewhat naughty -- should probably query the graph object
 	 * to find it's size */
@@ -114,9 +112,7 @@ void AutoLayout(AG_Event* event) {
 void AddEdge(AG_Event* event) {
 	AG_Driver* dri = get_dri();
 
-	/* This is much like the grap_p object -- status_label_p is set
-	 * during initialization to be the pointer to the status label. */
-	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
+	AG_Label* statuslabel = (AG_Label*) AG_PTR_NAMED("statuslabel");
 
 	/* Tell the user it's time to select a vertex */
 	AG_LabelText(statuslabel, "creating edge: select first vertex");
@@ -130,14 +126,15 @@ void AddEdge(AG_Event* event) {
  * process of creating an edge, then this function handles the edge selection
  * logic, and also creates the edge when ready */
 void HandleVertexSelection(AG_Event* event) {
+	AG_Graph* g = (AG_Graph*) AG_PTR_NAMED("g");
+	AG_Label* statuslabel = (AG_Label*) AG_PTR_NAMED("statuslabel");
+
+	AG_Driver* dri = get_dri();
+
 	/* The vertex which was selected is passed to the graph-vertex-selected
 	 * handler. If we are in state_v1 or _v2, we will save this to
 	 * a variable for use when creating an edge later */
-	AG_GraphVertex* vtx = (AG_GraphVertex*) AG_PTR(1);
-
-	AG_Driver* dri = get_dri();
-	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
-	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
+	AG_GraphVertex* vtx = (AG_GraphVertex*) AG_PTR(3);
 
 	/* we are currently selecting the first vertex */
 	if (AG_GetUint(dri, "state") == state_v1) {
@@ -175,28 +172,14 @@ void HandleVertexSelection(AG_Event* event) {
 /* handler for the OK button in the file dialog */
 void ExportGraph(AG_Event* event) {
 
-	char* path = AG_STRING(1);
-
-	AG_Driver* dri = get_dri();
-	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
-	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
+	AG_Graph* g = (AG_Graph*) AG_PTR_NAMED("g");
+	AG_Label* statuslabel = (AG_Label*) AG_PTR_NAMED("statuslabel");
+	char* path = AG_STRING(3);
+	AG_FileType* ft = (AG_FileType*) AG_PTR(4);
 
 	/* this is not safe, as it does not do bounds checking */
 	char* path_with_ext = malloc(sizeof(char) * (strlen(path) + 4));
 	strcpy(path_with_ext, path);
-
-	/* workaround for the fact that in LibAgar 1.5.0 the callbacks for
-	 * AG_FileDlgAddType() is broken (never called), and also that
-	 * FileDlgOkAction() never passes the selected FileType. This works by
-	 * directly overriding the event handler for the ComboBox that is used
-	 * to select file types. This might break since it does not handle the
-	 * cases where the user manually types something. Note the AG_SELF is
-	 * the file dialog. This is a kludgy mess, and is horribly unsafe. It
-	 * will definitely break if the internal structure of any of the
-	 * relevant widgets changes, or in non-default locales (due to the
-	 * ent[0]). Probably also in other cases. */
-	char* selected_type =
-		((AG_FileDlg*) AG_SELF())->comTypes->tbox->text->ent[0].buf;
 
 	/* force the widget to redraw, to make sure that the state we pull
 	 * out of the surface is current */
@@ -206,14 +189,14 @@ void ExportGraph(AG_Event* event) {
 	AG_Surface* surf = AG_WidgetSurface(g);
 
 	/* this is an awful way to do this... don't do this */
-	if (strcmp(selected_type, "PNG image (.png)") == 0) {
+	if (strcmp(ft->descr, "PNG image") == 0) {
 		if (!check_ext(path, ".png")) {
 			/* unsafe, does not bounds check */
 			strcat(path_with_ext, ".png");
 		}
 		AG_SurfaceExportPNG(surf, path_with_ext, 0);
 
-	} else if (strcmp(selected_type, "JPEG image (.jpg)") == 0) {
+	} else if (strcmp(ft->descr, "JPEG image") == 0) {
 		if (!check_ext(path, ".jpg")) {
 			/* unsafe, does not bounds check */
 			strcat(path_with_ext, ".jpg");
@@ -225,11 +208,12 @@ void ExportGraph(AG_Event* event) {
 			/* unsafe, does not bounds check */
 			strcat(path_with_ext, ".bmp");
 		}
+		/* AG_SurfaceExportBMP(surf, path, 0); */
 		AG_SurfaceExportBMP(surf, path);
 	}
 
 	/* destroy the file dialog */
-	AG_ObjectDetach(AG_ObjectParent(AG_SELF()));
+	/* AG_ObjectDetach(AG_ObjectParent(AG_SELF())); */
 
 	/* clean up the surface object */
 	AG_SurfaceFree(surf);
@@ -238,6 +222,9 @@ void ExportGraph(AG_Event* event) {
 
 /* Export the graph view to a file */
 void ExportGraphDialog(AG_Event* event) {
+
+	AG_Graph* g = (AG_Graph*) AG_PTR_NAMED("g");
+	AG_Label* statuslabel = (AG_Label*) AG_PTR_NAMED("statuslabel");
 
 	/* create a new window in which to display the file dialog */
 	AG_Window* fdwin = AG_WindowNew(0);
@@ -248,13 +235,16 @@ void ExportGraphDialog(AG_Event* event) {
 			AG_FILEDLG_CLOSEWIN /* close window when done */
 		);
 
+	/* handler to run when the ok button is pressed */
+	/* AG_FileDlgOkAction(f, ExportGraph, "%p(g),%p(statuslabel)", g, statuslabel); */
+	AG_SetEvent(f, "file-chosen", ExportGraph,
+				"%p(g),%p(statuslabel)", g, statuslabel);
+
 	/* set up valid output types */
 	AG_FileDlgAddType(f, "PNG image", ".png", NULL, NULL);
 	AG_FileDlgAddType(f, "JPEG image", ".jpg", NULL, NULL);
 	AG_FileDlgAddType(f, "BPM image", ".bmp", NULL, NULL);
 
-	/* handler to run when the ok button is pressed */
-	AG_FileDlgOkAction(f, ExportGraph, NULL);
 
 	/* display the file dialog window */
 	AG_WindowShow(fdwin);
@@ -265,9 +255,8 @@ void CreateSomeNodes(AG_Event* event) {
 	/* Create some nodes and then lay them out using the auto-layout. This
 	 * is just to get some vertices and edges out for demo purposes. */
 
-	AG_Driver* dri = get_dri();
-	AG_Label* statuslabel = (AG_Label*) AG_GetPointer(dri, "status_label_p");
-	AG_Graph* g = (AG_Graph*) AG_GetPointer(dri, "graph_p");
+	AG_Graph* g = (AG_Graph*) AG_PTR_NAMED("g");
+	AG_Label* statuslabel = (AG_Label*) AG_PTR_NAMED("statuslabel");
 
 	/* instantiate the vertices */
 	AG_GraphVertex* v1 = AG_GraphVertexNew(g, NULL);
@@ -316,9 +305,9 @@ int main(int argc, char *argv[]) {
 	AG_WindowSetCaptionS (win, "Graph Editor");
 
 	/* setup the state handler and edge creation vertex variables */
-	dri = AG_ObjectRoot(win);
-	AG_SetUint(dri, "state", state_ready);
+	dri = (AG_Driver*) AG_ObjectRoot(win);
 	AG_SetPointer(dri, "selected_vertex", NULL);
+	AG_SetUint(dri, "state", state_ready);
 
 	menu = AG_MenuNew(win, 0);
 	tb = AG_ToolbarNew(win, AG_TOOLBAR_HORIZ, 1, AG_TOOLBAR_VFILL);
@@ -327,9 +316,6 @@ int main(int argc, char *argv[]) {
 	/* instantiate the graph */
 	g = AG_GraphNew(win, AG_GRAPH_EXPAND);
 	AG_GraphSizeHint(g, 800, 600);
-
-	/* register the relevant handler to the graph-vertex-selected event */
-	AG_AddEvent(g, "graph-vertex-selected", HandleVertexSelection, NULL);
 
 	/* We will use this variable later so that we can access the graph
 	 * widget from our event handlers. There is probably a better way to
@@ -341,8 +327,12 @@ int main(int argc, char *argv[]) {
 	AG_SeparatorNew(win, AG_SEPARATOR_HORIZ);
 	statusbar = AG_StatusbarNew(win, AG_STATUSBAR_HFILL);
 	statuslabel = AG_StatusbarAddLabel(statusbar, "");
-	AG_SetPointer(dri, "status_label_p", statuslabel);
 	AG_LabelText(statuslabel, "ready");
+
+	/* register the relevant handler to the graph-vertex-selected event */
+	AG_AddEvent(g, "graph-vertex-selected", HandleVertexSelection,
+				"%p(g),%p(statuslabel)", g, statuslabel);
+
 
 	/* instantiate the "File" menu dropdown */
 	AG_MenuItem* menu_file = AG_MenuNode(menu->root, "File", NULL);
@@ -350,8 +340,10 @@ int main(int argc, char *argv[]) {
 	/* instantiate the contents of the File menu */
 	{
 
-		AG_MenuAction(menu_file, "Demo", NULL, CreateSomeNodes, NULL);
-		AG_MenuAction(menu_file, "Export", NULL, ExportGraphDialog, NULL);
+		AG_MenuAction(menu_file, "Demo", NULL, CreateSomeNodes,
+				"%p(g),%p(statuslabel)", g, statuslabel);
+		AG_MenuAction(menu_file, "Export", NULL, ExportGraphDialog,
+				"%p(g),%p(statuslabel)", g, statuslabel);
 
 		AG_MenuSeparator(menu_file);
 
@@ -363,15 +355,16 @@ int main(int argc, char *argv[]) {
 #endif
 	}
 
-
 	/* instantiates the contents of the toolbar */
 	{
-		AG_ToolbarButton(tb, "Add Vertex", 1, AddVertex, NULL);
-		AG_ToolbarButton(tb, "Add Edge", 1, AddEdge, NULL);
+		AG_ToolbarButton(tb, "Add Vertex", 1, AddVertex,
+				"%p(g),%p(statuslabel)", g, statuslabel);
+		AG_ToolbarButton(tb, "Add Edge", 1, AddEdge,
+				"%p(statuslabel)", statuslabel);
 		AG_ToolbarSeparator(tb);
-		AG_ToolbarButton(tb, "Auto Layout", 1, AutoLayout, NULL);
+		AG_ToolbarButton(tb, "Auto Layout", 1, AutoLayout,
+				"%p(g),%p(statuslabel)", g, statuslabel);
 	}
-
 
 	AG_WindowShow(win);
 
