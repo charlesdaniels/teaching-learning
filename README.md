@@ -9,6 +9,7 @@
 	* [Algorithms](#algorithms)
 	* [Data Structures](#data-structures)
 	* [Languages](#languages)
+	* [Libraries](#libraries)
 
 <!-- vim-markdown-toc -->
 
@@ -40,3 +41,7 @@ interesting output.
 ### Languages
 
 * [Simple CLI Program in C](./languages/c/simple-cli)
+
+### Libraries
+
+* [Graph Editor in LibAgar](./libraries/libagar/graph_editor)
