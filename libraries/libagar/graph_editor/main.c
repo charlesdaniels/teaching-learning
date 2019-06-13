@@ -172,6 +172,36 @@ void HandleVertexSelection(AG_Event* event) {
 
 }
 
+static void
+RenderToSurface(AG_Event *event)
+{
+    AG_Button *btn = AG_PTR(1);
+    AG_Window *winParent = AG_PTR(2), *win;
+    AG_Surface *S;
+
+    /* Render the AG_Button to a surface. */
+    if ((S = AG_WidgetSurface(btn)) == NULL) {
+        AG_TextMsgFromError();
+        return;
+    }
+
+    /* Display the rendered surface. */
+    if ((win = AG_WindowNew(0)) != NULL) {
+        AG_WindowSetCaptionS(win, "Rendered surface");
+        AG_LabelNew(win, 0, "Surface generated from %s:", AGOBJECT(btn)->name);
+        AG_SeparatorNewHoriz(win);
+        AG_PixmapFromSurface(win, 0, S);
+        AG_SeparatorNewHoriz(win);
+        AG_LabelNew(win, 0,
+            "Format: %u x %u x %d bpp",
+            S->w, S->h,
+            S->format.BitsPerPixel);
+
+        AG_WindowAttach(winParent, win);
+        AG_WindowShow(win);
+    }
+}
+
 /* handler for the OK button in the file dialog */
 void ExportGraph(AG_Event* event) {
 
@@ -213,8 +243,8 @@ void ExportGraph(AG_Event* event) {
 			/* unsafe, does not bounds check */
 			strcat(path_with_ext, ".bmp");
 		}
-		/* AG_SurfaceExportBMP(surf, path, 0); */
-		AG_SurfaceExportBMP(surf, path);
+		AG_SurfaceExportBMP(surf, path, 0);
+		/* AG_SurfaceExportBMP(surf, path); */
 	}
 
 	/* clean up the surface object */
@@ -288,6 +318,43 @@ void CreateSomeNodes(AG_Event* event) {
 	AG_LabelText(statuslabel, "created some nodes for you... ready.");
 }
 
+#ifdef ENABLE_DIRECTED
+void CreateSomeDirectedNodes(AG_Event* event) {
+	/* Create some nodes and then lay them out using the auto-layout. This
+	 * is just to get some vertices and edges out for demo purposes. */
+
+	AG_Graph* g = (AG_Graph*) AG_PTR_NAMED("g");
+	AG_Label* statuslabel = (AG_Label*) AG_PTR_NAMED("statuslabel");
+
+	/* instantiate the vertices */
+	AG_GraphVertex* v1 = AG_GraphVertexNew(g, NULL);
+	AG_GraphVertexLabelS(v1, "6");
+	AG_GraphVertex* v2 = AG_GraphVertexNew(g, NULL);
+	AG_GraphVertexLabelS(v2, "7");
+	AG_GraphVertex* v3 = AG_GraphVertexNew(g, NULL);
+	AG_GraphVertexLabelS(v3, "8");
+	AG_GraphVertex* v4 = AG_GraphVertexNew(g, NULL);
+	AG_GraphVertexLabelS(v4, "9");
+	AG_GraphVertex* v5 = AG_GraphVertexNew(g, NULL);
+	AG_GraphVertexLabelS(v5, "10");
+
+	/* instantiate some edges */
+	AG_DirectedGraphEdgeNew(g, v1, v2, NULL);
+	AG_DirectedGraphEdgeNew(g, v2, v2, NULL);
+	AG_DirectedGraphEdgeNew(g, v3, v2, NULL);
+	AG_DirectedGraphEdgeNew(g, v2, v4, NULL);
+	AG_DirectedGraphEdgeNew(g, v2, v5, NULL);
+	AG_DirectedGraphEdgeNew(g, v1, v5, NULL);
+	AG_DirectedGraphEdgeNew(g, v3, v4, NULL);
+
+	/* lay them out automatically */
+	AG_GraphAutoPlace(g, 800, 600);
+
+	AG_LabelText(statuslabel, "created some nodes for you... ready.");
+}
+#endif
+
+
 int main(int argc, char *argv[]) {
 	AG_Window *win;
 	AG_Graph* g;
@@ -347,6 +414,10 @@ int main(int argc, char *argv[]) {
 
 		AG_MenuAction(menu_file, "Demo", NULL, CreateSomeNodes,
 				"%p(g),%p(statuslabel)", g, statuslabel);
+#ifdef ENABLE_DIRECTED
+		AG_MenuAction(menu_file, "Demo (directed graph)", NULL, CreateSomeDirectedNodes,
+				"%p(g),%p(statuslabel)", g, statuslabel);
+#endif
 		AG_MenuAction(menu_file, "Export", NULL, ExportGraphDialog,
 				"%p(g),%p(statuslabel)", g, statuslabel);
 
@@ -366,6 +437,8 @@ int main(int argc, char *argv[]) {
 				"%p(g),%p(statuslabel)", g, statuslabel);
 		AG_ToolbarButton(tb, "Add Edge", 1, AddEdge,
 				"%p(statuslabel)", statuslabel);
+		AG_ToolbarButton(tb, "Render To Surface", 1, RenderToSurface,
+                "%p,%p", g, win);
 		AG_ToolbarSeparator(tb);
 		AG_ToolbarButton(tb, "Auto Layout", 1, AutoLayout,
 				"%p(g),%p(statuslabel)", g, statuslabel);

@@ -17,6 +17,7 @@ VERSION("0.0.1")
 REGISTER("--enable-warnings",	 "Enable compiler warnings [default: no]")
 REGISTER("--with-agar[=PREFIX]", "Agar installation path [default: auto]")
 REGISTER("--enable-debugger", "Enable Agar debugger - requires libagar to be built with libagar [default: no]")
+REGISTER("--enable-directed", "Enable support for Agar 1.6 directed graphs [default: no]")
 
 # Require a C compiler.
 REQUIRE(cc)
@@ -46,4 +47,8 @@ fi
 if [ "${enable_debugger}" = "yes" ] ; then
 	MDEFINE(CFLAGS, "$CFLAGS -DENABLE_DEBUGGER")
 	MDEFINE(CFLAGS, "${CFLAGS} -g")
+fi
+
+if [ "${enable_directed}" = "yes" ] ; then
+	MDEFINE(CFLAGS, "$CFLAGS -DENABLE_DIRECTED")
 fi
