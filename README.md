@@ -45,3 +45,4 @@ interesting output.
 ### Libraries
 
 * [Graph Editor in LibAgar](./libraries/libagar/graph_editor)
+* [Minimal C<->TCL FFI example](./libraries/tcl/minimal)
