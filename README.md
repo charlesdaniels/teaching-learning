@@ -46,3 +46,4 @@ interesting output.
 
 * [Graph Editor in LibAgar](./libraries/libagar/graph_editor)
 * [Minimal C<->TCL FFI example](./libraries/tcl/minimal)
+* [C<->TCL FFI example with namespaces](./libraries/tcl/package)

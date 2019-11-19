@@ -27,25 +27,8 @@
  * For more information, please refer to <http://unlicense.org/>
  */
 
-/* This file demonstrates how to instantiate a TCL interpreter within a C
- * program. Demonstrations of binding a C function to TCL, and sharing
- * variables between the two are shown.
- *
- * Note that you *probably* want to use the alternative style where your C
- * code is loaded as a TCL library. Especially if you want to use TCL as
- * an extension language for your program, you probably want that style.
- *
- * You should see ../package if you want to see an example.
- *
- * Really, if you want an extension language, you don't want to do it the
- * way this file shows. Trust me, I thought I knew better than all the
- * people that said that, then had to re-write a bunch of code.
- *
- * The style shown in this file is what you want if you're either doing
- * something very simple, or if you want to use this as some kind of embedded
- * configuration language. This *might* be what you want if you're trying to
- * build a DSL.
- */
+/* This file demonstrates how to implement a TCL package using C. In general,
+ * this is the preferred method of accessing C code from within TCL. */
 
 #include <tcl.h>
 #include <readline/readline.h>
@@ -54,21 +37,21 @@
 #include <signal.h>
 #include <time.h>
 
-int g_time;
+static int g_time;
 
-void alarm_handler(int signo) {
+static void alarm_handler(int signo) {
 	/* run every second to update the time bound variable */
 	g_time = time(NULL);
 	alarm(1);
 }
 
-int fibo(int n) {
+static int fibo(int n) {
 	if (n == 1) { return 1; }
 	if (n == 2) { return 1; }
 	else { return fibo(n-1) + fibo(n-2); }
 }
 
-int fibo_command(
+static int fibo_command(
 	ClientData data,	/* can be used by libraries to pass an
 				 * opaque pointer */
 	Tcl_Interp* interp,	/* the interpreter to run in, sometimes you
@@ -131,8 +114,8 @@ int fibo_command(
 	return TCL_OK;
 }
 
-int main(int argc, char** argv) {
-	Tcl_Interp* interp;
+int DLLEXPORT Samplepackage_Init(Tcl_Interp *interp) {
+	Tcl_Namespace *nsPtr; /* pointer to hold our own new namespace */
 
 	/* register the alarm handler as the signal handler */
 	signal(SIGALRM, alarm_handler);
@@ -140,20 +123,24 @@ int main(int argc, char** argv) {
 	/* wake us up in 1 second */
 	alarm(1);
 
-	/* this creates the interpreter object */
-	interp = Tcl_CreateInterp();
+	/* as in the other example, I'm not entirely clear what this does, but
+	 * it seems to make package importing work better */
+	if (Tcl_InitStubs(interp, TCL_VERSION, 0) == NULL) {
+		return TCL_ERROR;
+	}
 
-	/* I'm not 100% clear on what this does, but it seems to be important.
-	 * I think it helps with loading libraries */
-	Tcl_InitStubs(interp, TCL_VERSION, 0);
+	/* create the namespace object for our package */
+	nsPtr = Tcl_CreateNamespace(interp, "samplepackage", NULL, NULL);
+	if (nsPtr == NULL) {
+		return TCL_ERROR;
+	}
 
 	/* This instantiates our C function as a TCL function so it can be
 	 * called. */
-
 	Tcl_CreateObjCommand(
 		interp,				/* The interpreter we wish to
 						   operate on */
-		"fibo",				/* The symbol name for the new
+		"samplepackage::fibo",		/* The symbol name for the new
 						   function within the
 						   interpreter */
 		fibo_command,			/* The C function pointer */
@@ -170,7 +157,7 @@ int main(int argc, char** argv) {
 	Tcl_LinkVar(
 		interp,			/* interpreter to create linked var in
 					 */
-		"linked_time",		/* symbol name */
+		"samplepackage::linked_time",	/* symbol name */
 		(char*) &g_time,	/* pointer to shared variable, has 
 					 * to be of type char* for historical
 					 * reasons, use flags to set a
@@ -178,35 +165,17 @@ int main(int argc, char** argv) {
 		TCL_LINK_INT | TCL_LINK_READ_ONLY	/* flags */
 	);
 
-	if (isatty(fileno(stdin))) {
-		/* if standard input is an interactive terminal, then use
-		 * readline to make line editing nice */
-		char* line = NULL;
+	/* Allow fibo and linked_time to be pulled in via namespace import...
+	 * you would want to NOT do this if you intend for function
+	 * to be private to the namespace. This is equivelant to the 'namespace
+	 * export ...' TCL command */
+	Tcl_Export(interp, nsPtr, "fibo", 0);
 
-		/* keep looping, when readline is done it will return NULL */
-		while ((line = readline("minimal> ")) != NULL) {
+	/* Note that Tcl_Export does not work for variables, hence linked_time
+	 * cannot be included via namespace import directly */
 
-			/* ignore empty lines */
-			if (strlen(line) > 0) {
+	Tcl_PkgProvide(interp, "samplepackage", "0.0.1");
 
-				/* enable up arrow to work */
-				add_history(line);
+	return TCL_OK;
 
-				/* execute the line of input */
-				Tcl_Eval(interp, line);
-
-				/* display the result */
-				printf("%s\n", Tcl_GetStringResult(interp));
-
-			}
-		}
-
-	} else {
-		/* if standard in is non-interactive, don't fuss with line
-		 * editing or history */
-		Tcl_EvalFile(interp, "/dev/stdin");
-
-		/* and display the results */
-		printf("%s\n", Tcl_GetStringResult(interp));
-	}
 }
