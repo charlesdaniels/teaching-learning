@@ -1,4 +1,4 @@
-# Minimal TCL Example
+# Simple TCL Extension in C
 
 This demonstration shows a C-based extension to TCL. In general, this is the
 preferred way of interfacing C and TCL code.
