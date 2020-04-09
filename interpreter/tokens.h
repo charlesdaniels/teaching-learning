@@ -11,7 +11,7 @@ typedef enum {
 	TOK_EOF,
 	TOK_IDENT,
 	TOK_INT,
-	TOK_ASSIGN,
+	TOK_ASSIGN,	/// operators
 	TOK_PLUS,
 	TOK_COMMA,
 	TOK_SEMICOLON,
@@ -19,8 +19,21 @@ typedef enum {
 	TOK_RPAREN,
 	TOK_LBRACE,
 	TOK_RBRACE,
-	TOK_FUNCTION,
-	TOK_LET
+	TOK_MINUS,
+	TOK_BANG,
+	TOK_ASTERISK,
+	TOK_SLASH,
+	TOK_LT,
+	TOK_GT,
+	TOK_EQ,
+	TOK_NEQ,
+	TOK_FUNCTION,  // keywords
+	TOK_LET,
+	TOK_IF,
+	TOK_TRUE,
+	TOK_FALSE,
+	TOK_ELSE,
+	TOK_RETURN
 } tokentype;
 
 typedef struct{
@@ -41,8 +54,21 @@ typedef struct{
 	(_t == TOK_RPAREN) ? ")" : \
 	(_t == TOK_LBRACE) ? "{" : \
 	(_t == TOK_RBRACE) ? "}" : \
+	(_t == TOK_EQ) ? "==" : \
+	(_t == TOK_NEQ) ? "!=" : \
 	(_t == TOK_FUNCTION) ? "FUNCTION" : \
-	(_t == TOK_LET) ? "LET" :  "UNKNOWN TOKEN"
+	(_t == TOK_LET) ? "LET" : \
+	(_t == TOK_IF) ? "IF" : \
+	(_t == TOK_ELSE) ? "ELSE" : \
+	(_t == TOK_RETURN) ? "RETURN" : \
+	(_t == TOK_TRUE) ? "TRUE" : \
+	(_t == TOK_FALSE) ? "FALSE" : \
+	(_t == TOK_MINUS) ? "-" : \
+	(_t == TOK_BANG) ? "!" : \
+	(_t == TOK_ASTERISK) ? "*" : \
+	(_t == TOK_SLASH) ? "/" : \
+	(_t == TOK_LT) ? "<" : \
+	(_t == TOK_GT) ? ">" : "UNKNOWN TOKEN"
 
 /**
  * @brief Allocate a new token.

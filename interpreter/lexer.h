@@ -83,4 +83,13 @@ void skipWhitespace(lexer* l);
  */
 token* readNumber(lexer* l);
 
+/**
+ * @brief Peek ahead in the input by one character.
+ *
+ * @param l
+ *
+ * @return
+ */
+char peekChar(lexer* l);
+
 #endif /* LEXER_H */

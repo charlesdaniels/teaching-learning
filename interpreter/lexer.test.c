@@ -51,7 +51,18 @@ void TestNextToken_02(void) {
 		"    x + y;\n"
 		"};\n"
 		"\n"
-		"let result = add(five, ten);";
+		"let result = add(five, ten);\n"
+		"!-/*5;\n"
+		"5 < 10 > 5;\n"
+		"\n"
+		"if (5 < 10) {\n"
+		"    return true;\n"
+		"} else {\n"
+		"    return false;\n"
+		"}\n"
+		"\n"
+		"10 == 10;\n"
+		"10 != 9;";
 
 
 	struct TestNextToken_ExpectedResults {
@@ -95,6 +106,43 @@ void TestNextToken_02(void) {
 		{TOK_COMMA, ","},
 		{TOK_IDENT, "ten"},
 		{TOK_RPAREN, ")"},
+		{TOK_SEMICOLON, ";"},
+		{TOK_BANG, "!"},
+		{TOK_MINUS, "-"},
+		{TOK_SLASH, "/"},
+		{TOK_ASTERISK, "*"},
+		{TOK_INT, "5"},
+		{TOK_SEMICOLON, ";"},
+		{TOK_INT, "5"},
+		{TOK_LT, "<"},
+		{TOK_INT, "10"},
+		{TOK_GT, ">"},
+		{TOK_INT, "5"},
+		{TOK_SEMICOLON, ";"},
+		{TOK_IF, "if"},
+		{TOK_LPAREN, "("},
+		{TOK_INT, "5"},
+		{TOK_LT, "<"},
+		{TOK_INT, "10"},
+		{TOK_RPAREN, ")"},
+		{TOK_LBRACE, "{"},
+		{TOK_RETURN, "return"},
+		{TOK_TRUE, "true"},
+		{TOK_SEMICOLON, ";"},
+		{TOK_RBRACE, "}"},
+		{TOK_ELSE, "else"},
+		{TOK_LBRACE, "{"},
+		{TOK_RETURN, "return"},
+		{TOK_FALSE, "false"},
+		{TOK_SEMICOLON, ";"},
+		{TOK_RBRACE, "}"},
+		{TOK_INT, "10"},
+		{TOK_EQ, "=="},
+		{TOK_INT, "10"},
+		{TOK_SEMICOLON, ";"},
+		{TOK_INT, "10"},
+		{TOK_NEQ, "!="},
+		{TOK_INT, "9"},
 		{TOK_SEMICOLON, ";"},
 		{TOK_EOF, ""},
 		{0, NULL}
