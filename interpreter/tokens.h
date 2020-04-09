@@ -74,4 +74,13 @@ token* NewTokenFromChar(tokentype type, char literal);
  */
 void FreeToken(token* t);
 
+/**
+ * @brief Look up the identifier type for a literal.
+ *
+ * @param literal
+ *
+ * @return
+ */
+tokentype LookupIdent(char* literal);
+
 #endif /* TOKENS_H */

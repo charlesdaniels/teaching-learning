@@ -20,3 +20,10 @@ void FreeToken(token* t) {
 	free(t->literal);
 	free(t);
 }
+
+tokentype LookupIdent(char* literal) {
+	if (strcmp(literal, "fn") == 0) { return TOK_FUNCTION; }
+	if (strcmp(literal, "let") == 0) { return TOK_LET; }
+
+	return TOK_IDENT; 
+}

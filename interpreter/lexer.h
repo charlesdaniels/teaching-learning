@@ -58,4 +58,29 @@ void readChar(lexer* l);
  */
 token* NextToken(lexer* l);
 
+/**
+ * @brief Read a new identifier token from the lexer's input.
+ *
+ * @param l
+ *
+ * @return
+ */
+token* readIdentifier(lexer* l);
+
+/**
+ * @brief Advances the cursor until a non-whitespace character is encountered.
+ *
+ * @param l
+ */
+void skipWhitespace(lexer* l);
+
+/**
+ * @brief Reads a new INT token from the lexer's input.
+ *
+ * @param l
+ *
+ * @return
+ */
+token* readNumber(lexer* l);
+
 #endif /* LEXER_H */

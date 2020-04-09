@@ -32,12 +32,54 @@ void readChar(lexer* l) {
 	l->readPosition ++;
 }
 
+token* readIdentifier(lexer* l) {
+	char* ident_string;
+	size_t position;
+	token * t;
+	
+	position = l->position;
+	while (isLetter(l->ch)) {
+		readChar(l);
+	}
+
+	ident_string = strndup((l->input + position), (l->position - position));
+	t = NewToken(LookupIdent(ident_string), ident_string);
+	free(ident_string);
+
+	return t;
+}
+
+void skipWhitespace(lexer* l) {
+	while (isWhitespace(l->ch)) {
+		readChar(l);
+	}
+}
+
+token* readNumber(lexer* l) {
+	char* num_string;
+	size_t position;
+	token * t;
+	
+	position = l->position;
+	while (isDigit(l->ch)) {
+		readChar(l);
+	}
+
+	num_string = strndup((l->input + position), (l->position - position));
+	t = NewToken(TOK_INT, num_string);
+	free(num_string);
+
+	return t;
+}
+
 token* NextToken(lexer* l) {
-	token* t;
+	token* t = NULL;
 
 	/* macro to handle single-character tokens */
 #define singlechar(_compchar, _tokentype) \
 	else if (_compchar == l->ch) { t = NewTokenFromChar(_tokentype, l->ch); }
+
+	skipWhitespace(l);
 
 	if (false) { /* do nothing */ }
 	singlechar('=', TOK_ASSIGN)
@@ -48,8 +90,22 @@ token* NextToken(lexer* l) {
 	singlechar('+', TOK_PLUS)
 	singlechar('{', TOK_LBRACE)
 	singlechar('}', TOK_RBRACE)
+	singlechar('\0', TOK_EOF)
 	else {
-		t = NewToken(TOK_EOF, "");
+		if (isLetter(l->ch)) {
+			t = readIdentifier(l);
+
+			/* avoid calling readChar() again, since we already
+			 * called it inside of readIdentifier */
+			return t;
+
+		} else if (isDigit(l->ch)) {
+			t = readNumber(l);
+			return t;
+
+		} else {
+			t = NewTokenFromChar(TOK_ILLEGAL, l->ch);
+		}
 	}
 
 	readChar(l);
