@@ -6,6 +6,12 @@ CC ?= gcc
 CFLAGS ?= -O0 -g3 -Wall -Wextra
 OBJ = lexer.o tokens.o
 
+all: tests repl
+.PHONY: all
+
+repl: $(OBJ) repl.o
+> $(CC) $(CFLAGS) -lreadline -ledit -o $@ $^
+
 tests: lexer.test
 > ./lexer.test
 .PHONY: tests
