@@ -10,6 +10,7 @@
 	* [Data Structures](#data-structures)
 	* [Languages](#languages)
 	* [Libraries](#libraries)
+	* [Other](#other)
 
 <!-- vim-markdown-toc -->
 
@@ -47,3 +48,8 @@ interesting output.
 * [Graph Editor in LibAgar](./libraries/libagar/graph_editor)
 * [Minimal C<->TCL FFI example](./libraries/tcl/minimal)
 * [C<->TCL FFI example with namespaces](./libraries/tcl/package)
+
+### Other
+
+* [Ray Tracing in One Weekend](./raytracing)
+	* Based on the book [Ray Tracing in One Weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html), but in C rather than C++.
