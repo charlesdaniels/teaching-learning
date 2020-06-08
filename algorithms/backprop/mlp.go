@@ -174,15 +174,18 @@ func (nn *MLP) BackwardPass(output []float64) error {
 	// calculate deltas for output layer
 	for j := 0; j < nn.OutputLayer().TotalNeurons(); j++ {
 		nn.OutputLayer().Delta[j] = ActivationDeriv(Logit(nn.OutputLayer().Output[j])) * (output[j] - nn.OutputLayer().Output[j])
+		// nn.OutputLayer().Delta[j] = output[j] - nn.OutputLayer().Output[j]
 	}
 
 	// and for remaining layers
 	for l := len(nn.Layer) - 2; l >= 0; l-- {
 		layer := nn.Layer[l]
 		for i := 0; i < layer.TotalNeurons(); i++ {
+			layer.Delta[i] = 0
 			for j := 0; j < layer.Next.TotalNeurons(); j++ {
 				layer.Delta[i] += layer.Next.GetWeight(j, i) * layer.Next.Delta[j]
 			}
+			// layer.Delta[i] *= layer.Output[i]
 			layer.Delta[i] *= ActivationDeriv(Logit(layer.Output[i]))
 		}
 	}
@@ -199,10 +202,10 @@ func (nn *MLP) UpdateWeights() {
 			}
 			for j := 0; j < layer.Prev.TotalNeurons(); j++ {
 				layer.SetWeight(i, j,
-					layer.GetWeight(i, j)+nn.Alpha*layer.Output[i]*layer.Prev.Delta[j])
+					layer.GetWeight(i, j)+nn.Alpha*layer.Prev.Output[j]*layer.Delta[i])
 
 				// also update thebiases
-				layer.Bias[i] += nn.Alpha * layer.Output[i] * layer.Prev.Delta[j]
+				layer.Bias[i] += nn.Alpha * layer.Prev.Output[j] * layer.Delta[i]
 			}
 		}
 	}
@@ -285,12 +288,18 @@ func main() {
 		}
 
 		fmt.Printf("Training with input=%v, output=%v\n", input, output)
-		err := nn.Train(input, output)
-		if err != nil {
-			panic(err)
+		for i := 0; i < 1000; i++ {
+			err := nn.Train(input, output)
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
+
 	fmt.Println(nn)
+	for _, layer := range nn.Layer {
+		fmt.Println(layer)
+	}
 
 	inputs := result["inputs"].([]interface{})
 	for _, v := range inputs {
