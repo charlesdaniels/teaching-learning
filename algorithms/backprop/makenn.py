@@ -5,7 +5,7 @@ import random
 
 j = {
     "network": {
-        "layers": [2, 5, 5, 1],
+        "layers": [2, 5, 1],
         "alpha": 0.1
     },
     "examples": [],

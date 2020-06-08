@@ -14,6 +14,7 @@ import (
 	"fmt"
 	"github.com/akamensky/argparse"
 	"io/ioutil"
+	"math"
 	"math/rand"
 	"os"
 )
@@ -108,7 +109,8 @@ type NeuralNetwork struct {
 }
 
 func (nn *NeuralNetwork) ActivationFunction(neuron uint, inj float32) float32 {
-	return nn.Bias[neuron] + inj
+	// return nn.Bias[neuron] + inj
+	return float32(1.0 / (1.0 + math.Exp(float64(-inj+nn.Bias[neuron]))))
 }
 
 func NewNeuralNet(spec LayerSpec, alpha float32) *NeuralNetwork {
@@ -146,7 +148,7 @@ func NewNeuralNet(spec LayerSpec, alpha float32) *NeuralNetwork {
 		}
 
 		// also initialize the biases to small random values as well...
-		nn.Bias[neuron] = 1 //rand.Float32()
+		nn.Bias[neuron] = rand.Float32()
 	}
 
 	return nn
