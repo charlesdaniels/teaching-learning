@@ -123,19 +123,20 @@ func NewNeuralNet(spec LayerSpec, alpha float32) *NeuralNetwork {
 	// allocate space for the weights matrix
 	for neuron := uint(0); neuron < spec.TotalNeurons(); neuron++ {
 		var prevLayerSize uint
-
-		// for the inner arrays, we only allocate enough space for the
-		// weights applying to the previous layer's neurons
-		if spec.GetLayer(neuron) == 0 {
-			// we assume that the first layer has it's size many
-			// inputs.
-			prevLayerSize = spec.Size[spec.GetLayer(neuron)]
-		} else {
-			// otherwise we want to have enough space for the
-			// previous layer
-			prevLayerSize = spec.Size[spec.GetLayer(neuron)-1]
-
-		}
+		//
+		// // for the inner arrays, we only allocate enough space for the
+		// // weights applying to the previous layer's neurons
+		// if spec.GetLayer(neuron) == 0 {
+		//         // we assume that the first layer has it's size many
+		//         // inputs.
+		//         prevLayerSize = spec.Size[spec.GetLayer(neuron)]
+		// } else {
+		//         // otherwise we want to have enough space for the
+		//         // previous layer
+		//         prevLayerSize = spec.Size[spec.GetLayer(neuron)-1]
+		//
+		// }
+		prevLayerSize = spec.TotalNeurons()
 		nn.Weight[neuron] = make([]float32, prevLayerSize)
 
 		// initialize to small random values
@@ -145,7 +146,7 @@ func NewNeuralNet(spec LayerSpec, alpha float32) *NeuralNetwork {
 		}
 
 		// also initialize the biases to small random values as well...
-		nn.Bias[neuron] = rand.Float32()
+		nn.Bias[neuron] = 1 //rand.Float32()
 	}
 
 	return nn
@@ -189,7 +190,8 @@ func (nn *NeuralNetwork) Train(input, output []float32) error {
 
 			// for each input in the previous layer...
 			for i := uint(0); i < nn.Spec.Size[l-1]; i++ {
-				inj += nn.Weight[jabs][i] * nn.Output[nn.Spec.Offset(l-1, i)]
+				iabs := nn.Spec.Offset(l-1, i)
+				inj += nn.Weight[iabs][jabs] * nn.Output[iabs]
 			}
 
 			//a_j ← g(Σi w+i,j a_i)
@@ -217,7 +219,7 @@ func (nn *NeuralNetwork) Train(input, output []float32) error {
 			delta[iabs] = 0
 			for j := uint(0); j < nn.Spec.Size[l+1]; j++ {
 				jabs := nn.Spec.Offset(uint(l+1), j)
-				delta[iabs] += nn.Weight[jabs][i] * delta[i]
+				delta[iabs] += nn.Weight[iabs][jabs] * delta[i]
 			}
 		}
 	}
@@ -225,14 +227,14 @@ func (nn *NeuralNetwork) Train(input, output []float32) error {
 	// update weights
 	for i, _ := range nn.Weight {
 		for j, _ := range nn.Weight[i] {
-			fmt.Printf("Offset(%v, %v)=%v\n", nn.Spec.GetLayer(uint(i)), uint(j),
-				nn.Spec.Offset(nn.Spec.GetLayer(uint(i)), uint(j)))
-			if int(nn.Spec.Offset(nn.Spec.GetLayer(uint(i)), uint(j))) >= len(delta) {
-				fmt.Printf("XXX\n")
+			jabs := nn.Spec.Offset(nn.Spec.GetLayer(uint(i)), uint(j))
+			if int(jabs) >= len(delta) {
+				// some of the values calculated in this way
+				// will be out of bounds
 				continue
 			}
-			nn.Weight[i][j] += nn.Alpha * nn.Output[i] *
-				delta[nn.Spec.Offset(nn.Spec.GetLayer(uint(i)), uint(j))]
+
+			nn.Weight[i][j] += nn.Alpha * nn.Output[i] * delta[jabs]
 		}
 	}
 
@@ -269,7 +271,8 @@ func (nn *NeuralNetwork) Predict(input []float32) ([]float32, error) {
 
 			// for each input in the previous layer...
 			for i := uint(0); i < nn.Spec.Size[l-1]; i++ {
-				inj += nn.Weight[jabs][i] * nn.Output[nn.Spec.Offset(l-1, i)]
+				iabs := nn.Spec.Offset(l-1, i)
+				inj += nn.Weight[iabs][jabs] * nn.Output[iabs]
 			}
 
 			//a_j ← g(Σi w+i,j a_i)
@@ -323,6 +326,7 @@ func main() {
 	nn := NewNeuralNet(spec, alpha)
 
 	examples := result["examples"].([]interface{})
+	fmt.Println(nn)
 	for _, v := range examples {
 		tup := v.([]interface{})
 		rawinput := tup[0].([]interface{})
@@ -343,8 +347,22 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+	}
+	fmt.Println(nn)
 
-		fmt.Printf("%v\n", nn)
+	inputs := result["inputs"].([]interface{})
+	for _, v := range inputs {
+		input := make([]float32, 0)
+		for _, inp := range v.([]interface{}) {
+			input = append(input, float32(inp.(float64)))
+		}
+
+		res, err := nn.Predict(input)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Running with input=%v, result=%v\n", input, res)
+
 	}
 
 }
