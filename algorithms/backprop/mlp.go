@@ -200,6 +200,9 @@ func (nn *MLP) UpdateWeights() {
 			for j := 0; j < layer.Prev.TotalNeurons(); j++ {
 				layer.SetWeight(i, j,
 					layer.GetWeight(i, j)+nn.Alpha*layer.Output[i]*layer.Prev.Delta[j])
+
+				// also update thebiases
+				layer.Bias[i] += nn.Alpha * layer.Output[i] * layer.Prev.Delta[j]
 			}
 		}
 	}
