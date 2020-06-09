@@ -6,11 +6,11 @@
 * [Introduction](#introduction)
 * [Conventions](#conventions)
 * [Index](#index)
-	* [Algorithms](#algorithms)
-	* [Data Structures](#data-structures)
-	* [Languages](#languages)
-	* [Libraries](#libraries)
-	* [Other](#other)
+    * [Algorithms](#algorithms)
+    * [Data Structures](#data-structures)
+    * [Languages](#languages)
+    * [Libraries](#libraries)
+    * [Other](#other)
 
 <!-- vim-markdown-toc -->
 
@@ -33,6 +33,7 @@ interesting output.
 ### Algorithms
 
 * [Mandlebrot Set Visualizer in Python](./algorithms/mandlebrot)
+* [Back Propogation Learning in Go](./algorithms/backprop)
 
 ### Data Structures
 
