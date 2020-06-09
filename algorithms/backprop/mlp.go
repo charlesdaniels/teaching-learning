@@ -1,5 +1,8 @@
 package main
 
+// This file implements a simple neural network based on the one from Russel &
+// Norvig 3/e, Chapter 18 "Learning From Examples"
+
 import (
 	"encoding/json"
 	"fmt"
@@ -25,6 +28,10 @@ type Layer struct {
 
 	// Outputs for this layer
 	Output []float64
+
+	// The output after activation -- this is separate because we need the
+	// pre-activation outputs for certain computations
+	Activation []float64
 
 	Delta []float64
 
@@ -56,11 +63,12 @@ func (l *Layer) SetWeight(thisNeuron, prevNeuron int, newWeight float64) {
 
 func NewLayer(size int, prev, next *Layer) *Layer {
 	l := &Layer{
-		Prev:   prev,
-		Next:   next,
-		Delta:  make([]float64, size),
-		Output: make([]float64, size),
-		Bias:   make([]float64, size),
+		Prev:       prev,
+		Next:       next,
+		Delta:      make([]float64, size),
+		Output:     make([]float64, size),
+		Activation: make([]float64, size),
+		Bias:       make([]float64, size),
 	}
 
 	if prev != nil {
@@ -83,6 +91,7 @@ func NewLayer(size int, prev, next *Layer) *Layer {
 type MLP struct {
 	Layer []*Layer
 
+	// Learning rate
 	Alpha float64
 }
 
@@ -100,6 +109,7 @@ func NewMLP(alpha float64, layerSizes ...int) *MLP {
 		Alpha: alpha,
 	}
 
+	// generate the layers and their links back to the previous layers
 	for i, v := range layerSizes {
 		if i == 0 {
 			nn.Layer[i] = NewLayer(v, nil, nil)
@@ -146,19 +156,34 @@ func (nn *MLP) ForwardPass(input []float64) error {
 
 	// copy input data into input layer outputs
 	for i := 0; i < nn.InputLayer().TotalNeurons(); i++ {
-		nn.InputLayer().Output[i] = input[i]
+		nn.InputLayer().Activation[i] = input[i]
+
+		// in_j is not used for the input layer
+		nn.InputLayer().Output[i] = 0
 	}
 
 	// consider remaining layers
 	for l := 1; l < len(nn.Layer); l++ {
 		layer := nn.Layer[l]
-		for i := 0; i < layer.TotalNeurons(); i++ {
-			sum := 0.0
-			for j := 0; j < layer.Prev.TotalNeurons(); j++ {
-				sum += layer.Prev.Output[j] * layer.GetWeight(i, j)
+		for j := 0; j < layer.TotalNeurons(); j++ {
+			// in_j ← ∑i w_i,j ai
+			sum := 0.0 // sum is in_j
+			for i := 0; i < layer.Prev.TotalNeurons(); i++ {
+				// layer.Prev.Activation[j] is a_i
+				// layer.GetWeight(j, i) w_i,j
+				sum += layer.Prev.Activation[i] * layer.GetWeight(j, i)
 			}
-			sum += layer.Bias[i]
-			layer.Output[i] = ActivationFunction(sum)
+
+			// explicitly account for the bias, which is handled
+			// implicitly in the Russel & Norvig text as weight
+			sum += layer.Bias[j]
+
+			// a_j ← g(in_j)
+			layer.Activation[j] = ActivationFunction(sum)
+
+			// We also save in_j because we need it later for
+			// computing the Δ values
+			layer.Output[j] = sum
 		}
 	}
 
@@ -174,21 +199,48 @@ func (nn *MLP) BackwardPass(output []float64) error {
 
 	// calculate deltas for output layer
 	for j := 0; j < nn.OutputLayer().TotalNeurons(); j++ {
-		nn.OutputLayer().Delta[j] = ActivationDeriv(Logit(nn.OutputLayer().Output[j])) * (output[j] - nn.OutputLayer().Output[j])
-		// nn.OutputLayer().Delta[j] = (output[j] nn.OutputLayer().Output[j]) * ActivationDeriv(nn.OutputLayer().Output[j])
+		// Δ[j] ← g'(in_j) × (y_j - a_j)
+		//
+		// nn.OutputLayer().Delta[j] is Δ[j]
+		//
+		// g' is ActivationDeriv()
+		//
+		// in_j is layer.Output[j]
+		//
+		// a_j is layer.activation[j]
+		//
+		// y_j is output[j]
+		//
+		//    Notice that we have already asserted that the output
+		//    layer and the output vector are the same size, so it is
+		//    safe to assume we won't go out of bounds in output
+		nn.OutputLayer().Delta[j] =
+			ActivationDeriv(nn.OutputLayer().Output[j]) * (output[j] - nn.OutputLayer().Activation[j])
 	}
 
 	// and for remaining layers
 	for l := len(nn.Layer) - 2; l >= 0; l-- {
 		layer := nn.Layer[l]
 		for i := 0; i < layer.TotalNeurons(); i++ {
+			// Δ[i] ← g'(in_i) ∑j w_i,j Δ[j]
+			//
+			// layer.Delta[i] is Δ[i]
+			//
+			// layer.Next.GetWeight(j, i) w_i,j
+			//
+			//    The indices appear reversed because of how
+			//    GetWeight() is written, j is the destination
+			//    neuron on layer.Next, i is the neuron in this
+			//    current layer.
+			//
+			// layer.Next.Delta[j] is Δ[j]
+			//
+			// layer.Output[i] is in_i
 			layer.Delta[i] = 0
 			for j := 0; j < layer.Next.TotalNeurons(); j++ {
 				layer.Delta[i] += layer.Next.GetWeight(j, i) * layer.Next.Delta[j]
 			}
-			// layer.Delta[i] *= layer.Output[i]
-			// layer.Delta[i] = layer.Delta[i] * ActivationDeriv(layer.Output[i])
-			layer.Delta[i] *= ActivationDeriv(Logit(layer.Output[i]))
+			layer.Delta[i] *= ActivationDeriv(layer.Output[i])
 		}
 	}
 
@@ -203,13 +255,19 @@ func (nn *MLP) UpdateWeights() {
 				continue
 			}
 			for j := 0; j < layer.Prev.TotalNeurons(); j++ {
+				// w_i,j ← w_i,j + α × a_i × Δ[j]
+				//
+				// layer.Activation[i] is a_i
+				//
+				// layer.Prev.Delta[j] is Δ[j]
+				//
+				// nn.Alpha is α
 				layer.SetWeight(i, j,
-					layer.GetWeight(i, j)+nn.Alpha*layer.Output[i]*layer.Prev.Delta[j])
-				// layer.SetWeight(i, j,
-				//         nn.Alpha*layer.Delta[i]*layer.Prev.Output[j])
+					layer.GetWeight(i, j)+nn.Alpha*layer.Activation[i]*layer.Prev.Delta[j])
 
-				// also update thebiases
-				// layer.Bias[i] += nn.Alpha * layer.Prev.Output[j] * layer.Delta[i]
+				// we also update the bias at this point,
+				// keeping in mind that the a_i for the bias is
+				// implied to be 1
 				layer.Bias[i] += nn.Alpha * layer.Delta[i]
 			}
 		}
@@ -238,7 +296,7 @@ func (nn *MLP) Predict(input []float64) ([]float64, error) {
 		return nil, err
 	}
 
-	return nn.OutputLayer().Output, nil
+	return nn.OutputLayer().Activation, nil
 }
 
 func main() {
@@ -269,7 +327,38 @@ func main() {
 		panic(err)
 	}
 
+	// We load the NN from the JSON file. The error handling here is
+	// not very good, but I didn't feel like writing all the structs
+	// to directly map onto the JSON.
+	//
+	// This is and example of the basic structure we want:
+	//
+	// {
+	//     "_comment": "Neural network implementation of AND gate",
+	//     "network": {
+	//         "layers": [2, 5, 5, 1],
+	//         "alpha": 0.1
+	//     },
+	//     "examples": [
+	//         [[0.0, 0.0], [0.0]],
+	//         [[0.0, 1.0], [1.0]],
+	//         [[1.0, 0.0], [1.0]],
+	//         [[1.0, 1.0], [1.0]]
+	//     ],
+	//     "inputs": [
+	//         [0, 0],
+	//         [1, 0],
+	//         [0, 1],
+	//         [1, 1]
+	//     ]
+	// }
+	//
+	// The "_comment" field can simply be ignored. Note that the input
+	// and output vectors have to match the length of the laers specified.
+
 	network := result["network"].(map[string]interface{})
+
+	// Parse enough to create the network...
 	alpha := network["alpha"].(float64)
 	layers := make([]int, 0)
 	for _, v := range network["layers"].([]interface{}) {
@@ -278,12 +367,18 @@ func main() {
 
 	nn := NewMLP(alpha, layers...)
 
+	// Now we start on the examples, training as we go.
 	examples := result["examples"].([]interface{})
 	fmt.Printf("training network... \n")
 	bar := pb.StartNew(*e)
 	for epoch := 0; epoch < *e; epoch++ {
 		bar.Increment()
+
+		// rand.Perm(len(examples)) will give us the shuffled indices
+		// of the examples array.
 		for _, idx := range rand.Perm(len(examples)) {
+
+			// Pull out the input and output vectors.
 			v := examples[idx]
 			tup := v.([]interface{})
 			rawinput := tup[0].([]interface{})
@@ -291,6 +386,8 @@ func main() {
 			input := make([]float64, 0)
 			output := make([]float64, 0)
 
+			// Copy and typecast in one go from the input to the
+			// output vectors.
 			for _, inp := range rawinput {
 				input = append(input, inp.(float64))
 			}
@@ -299,7 +396,7 @@ func main() {
 				output = append(output, out.(float64))
 			}
 
-			//fmt.Printf("Training with input=%v, output=%v\n", input, output)
+			// Pass the example into the network.
 			err := nn.Train(input, output)
 			if err != nil {
 				panic(err)
@@ -308,8 +405,13 @@ func main() {
 	}
 	bar.Finish()
 
+	// Finally, consider the inputs we'd like to compute results for.
+	// These don't have expected values, since in principle they are cases
+	// where we want the model to extrapolate for us.
 	inputs := result["inputs"].([]interface{})
 	for _, v := range inputs {
+
+		// This works the same way as for the examples.
 		input := make([]float64, 0)
 		for _, inp := range v.([]interface{}) {
 			input = append(input, inp.(float64))
