@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/akamensky/argparse"
+	"github.com/cheggaaa/pb/v3"
 	"io/ioutil"
 	"math"
 	"math/rand"
@@ -120,7 +121,7 @@ func NewMLP(alpha float64, layerSizes ...int) *MLP {
 }
 
 func Sigmoid(x float64) float64 {
-	return 1 / (1 + math.Exp(-1*x))
+	return 1.0 / (1.0 + math.Exp(-1.0*x))
 }
 
 func Logit(x float64) float64 {
@@ -151,13 +152,13 @@ func (nn *MLP) ForwardPass(input []float64) error {
 	// consider remaining layers
 	for l := 1; l < len(nn.Layer); l++ {
 		layer := nn.Layer[l]
-		for j := 0; j < layer.TotalNeurons(); j++ {
-			inj := 0.0
-			for i := 0; i < layer.Prev.TotalNeurons(); i++ {
-				inj += layer.GetWeight(j, i) * layer.Prev.Output[i]
+		for i := 0; i < layer.TotalNeurons(); i++ {
+			sum := 0.0
+			for j := 0; j < layer.Prev.TotalNeurons(); j++ {
+				sum += layer.Prev.Output[j] * layer.GetWeight(i, j)
 			}
-			inj += layer.Bias[j]
-			layer.Output[j] = ActivationFunction(inj)
+			sum += layer.Bias[i]
+			layer.Output[i] = ActivationFunction(sum)
 		}
 	}
 
@@ -174,7 +175,7 @@ func (nn *MLP) BackwardPass(output []float64) error {
 	// calculate deltas for output layer
 	for j := 0; j < nn.OutputLayer().TotalNeurons(); j++ {
 		nn.OutputLayer().Delta[j] = ActivationDeriv(Logit(nn.OutputLayer().Output[j])) * (output[j] - nn.OutputLayer().Output[j])
-		// nn.OutputLayer().Delta[j] = output[j] - nn.OutputLayer().Output[j]
+		// nn.OutputLayer().Delta[j] = (output[j] nn.OutputLayer().Output[j]) * ActivationDeriv(nn.OutputLayer().Output[j])
 	}
 
 	// and for remaining layers
@@ -186,6 +187,7 @@ func (nn *MLP) BackwardPass(output []float64) error {
 				layer.Delta[i] += layer.Next.GetWeight(j, i) * layer.Next.Delta[j]
 			}
 			// layer.Delta[i] *= layer.Output[i]
+			// layer.Delta[i] = layer.Delta[i] * ActivationDeriv(layer.Output[i])
 			layer.Delta[i] *= ActivationDeriv(Logit(layer.Output[i]))
 		}
 	}
@@ -202,10 +204,13 @@ func (nn *MLP) UpdateWeights() {
 			}
 			for j := 0; j < layer.Prev.TotalNeurons(); j++ {
 				layer.SetWeight(i, j,
-					layer.GetWeight(i, j)+nn.Alpha*layer.Prev.Output[j]*layer.Delta[i])
+					layer.GetWeight(i, j)+nn.Alpha*layer.Output[i]*layer.Prev.Delta[j])
+				// layer.SetWeight(i, j,
+				//         nn.Alpha*layer.Delta[i]*layer.Prev.Output[j])
 
 				// also update thebiases
-				layer.Bias[i] += nn.Alpha * layer.Prev.Output[j] * layer.Delta[i]
+				// layer.Bias[i] += nn.Alpha * layer.Prev.Output[j] * layer.Delta[i]
+				layer.Bias[i] += nn.Alpha * layer.Delta[i]
 			}
 		}
 	}
@@ -242,6 +247,9 @@ func main() {
 	i := parser.File("i", "input-file", os.O_RDONLY, 0755,
 		&argparse.Options{Required: true, Help: "Input file to read NN spec from."})
 
+	e := parser.Int("e", "epochs",
+		&argparse.Options{Required: false, Default: 1000, Help: "Number of epochs to train the neural network for."})
+
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
@@ -271,35 +279,34 @@ func main() {
 	nn := NewMLP(alpha, layers...)
 
 	examples := result["examples"].([]interface{})
-	fmt.Println(nn)
-	for _, v := range examples {
-		tup := v.([]interface{})
-		rawinput := tup[0].([]interface{})
-		rawoutput := tup[1].([]interface{})
-		input := make([]float64, 0)
-		output := make([]float64, 0)
+	fmt.Printf("training network... \n")
+	bar := pb.StartNew(*e)
+	for epoch := 0; epoch < *e; epoch++ {
+		bar.Increment()
+		for _, idx := range rand.Perm(len(examples)) {
+			v := examples[idx]
+			tup := v.([]interface{})
+			rawinput := tup[0].([]interface{})
+			rawoutput := tup[1].([]interface{})
+			input := make([]float64, 0)
+			output := make([]float64, 0)
 
-		for _, inp := range rawinput {
-			input = append(input, inp.(float64))
-		}
+			for _, inp := range rawinput {
+				input = append(input, inp.(float64))
+			}
 
-		for _, out := range rawoutput {
-			output = append(output, out.(float64))
-		}
+			for _, out := range rawoutput {
+				output = append(output, out.(float64))
+			}
 
-		fmt.Printf("Training with input=%v, output=%v\n", input, output)
-		for i := 0; i < 1000; i++ {
+			//fmt.Printf("Training with input=%v, output=%v\n", input, output)
 			err := nn.Train(input, output)
 			if err != nil {
 				panic(err)
 			}
 		}
 	}
-
-	fmt.Println(nn)
-	for _, layer := range nn.Layer {
-		fmt.Println(layer)
-	}
+	bar.Finish()
 
 	inputs := result["inputs"].([]interface{})
 	for _, v := range inputs {
